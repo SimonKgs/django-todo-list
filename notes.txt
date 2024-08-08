@@ -1,0 +1,85 @@
+start server
+python manage.py runserver
+
+to let connections from everywhere, maybe I need it when deploy it
+* I think it is maybe connection to work in but no sure, learn more
+python manage.py runserver 0.0.0.0:8000
+
+in settings.py I could add the ip in allowed_host
+ALLOWED_HOSTS = ['111.111.111.111']
+
+a django project could have a lot of apps to create one is like:
+django-admin startapp APPNAME
+
+when you create a project you must add it to the main project urls.pylñs
+so a project folders looks like:
+
+project
+-project
+--urls // here in urlspatterns should include the path of the app*
+-app
+
+*like
+urlpatterns = [
+    ...,
+    path('', include('app.urls'))
+]
+
+then I have to create a urls.py inside the path because it is not here by default
+
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('', views.index, name='index'),
+]
+
+it means:
+'': the path of the app
+view.index: it is a function that must be in views, it have the action when access to this path
+name: optional param
+
+
+To create an html template it works like Flask
+I must create a folder called templates
+
+here i will create the html pages
+
+Now it is very similar to Flask
+First we create a template index.html on templates directory
+
+then i have to come back to my .views that is like the main on Flask and add the page like:
+from django.shortcuts import render
+
+
+# Create your views here.
+def index(request):
+    return render(request, 'index.html')
+
+an extra thing here is that I have to declare my app in the project folder settings.py
+
+INSTALLED_APPS = [
+    ...,
+    'todoList'
+]
+
+also like in flask we can create a template to avoid code repetition so lets create a base.html
+we can add a block like this:
+
+{% block content %}
+{% endblock %}
+
+and later we can use it the same way adding the content to the block.
+
+Now to add another page simply:
+
+1. create the page in templates folder
+2. create a function to render it on views.py
+3. add the new path to the urls.py
+path, function, name
+
+The name will be good to refer to that path later like in a href:
+<a href="{ url 'index'}" %}
+also similar to Flask but shorter syntax
+
+

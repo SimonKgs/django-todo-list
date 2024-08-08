@@ -1,0 +1,131 @@
+READ from the db:
+
+    todos = Todo.objects.all()
+
+
+CREATE a new register, for example I have this form on my template:
+
+<form method="post" action="{% url 'index' %}">
+    {% csrf_token %}
+<tr>
+    <td>{{ form.task }}</td>
+    <td>{{ form.done }}</td>
+    <td></td>
+    <td><button name="save">Save</button></td>
+</tr>
+
+it was previously associated to my model when create the form
+So i already have the instance of the form passed and i am reading
+then to get it values of the fields and save into the db is like this:
+
+def index(request):
+    context = {}
+    form = TodoForm()
+    todos = Todo.objects.all()
+    context['todos'] = todos
+    context['title'] = 'Home'
+
+# Check if the request method is Post in this case it will tell that was sent
+    if request.method == 'POST':
+    # This is the name of the button, could be other, I use it to check the action
+    # Then I associate the values which comes on the request to my form and save it
+        if 'save' in request.POST:
+            form = TodoForm(request.POST)
+            form.save()
+
+    context['form'] = form
+    return render(request, 'index.html', context)
+
+With this now there is a new entry on the db.
+
+
+DELETE
+
+For both delete and update I need the id of the entry that i want to modify
+I can get it by binding the value to the button with the action like:
+     <button name="edit" value="{{ todo.id }}">Edit</button>
+
+so i can get it from the views similar to before, i add this after if 'save'
+
+        elif 'delete' in request.POST:
+        # obtain the id bound to the button
+            pk = request.POST.get('delete')
+        # get the tod by id and delete it
+            todo = Todo.objects.get(id=pk)
+            todo.delete()
+
+Now when tried to delete the form ask us for complete the field
+so to prevent it when edit or delete I will add formnovalidate to the buttons
+        <button formnovalidate name="delete" value="{{ todo.id }}">Delete</button>
+
+Now we can delete the entry without validation the field that is not relevant here
+
+
+UPDATE
+
+This time we have to make two requests:
+first: get the values and prepare to edit it,
+after the delete field I add this:
+
+elif 'edit' in request.POST:
+            pk = request.POST.get('edit')
+            todo = Todo.objects.get(id=pk)
+     # this line will load the data of the todo on the form
+            form = TodoForm(instance=todo)
+
+NOW THERE ARE CHANGES TO THE UPDATE
+First we now how to add an instance loaded on the form,
+so now i will separate the logic of the save in other file
+the file will be save.html and looks like
+
+<td>{{ form.task }}</td>
+<td>{{ form.done }}</td>
+<td></td>
+<td><button name=
+
+the row to save nothing amazing, but now lets come back to the index
+i will show like before if i dont have and id on the instance,
+this will show the line at the beginning
+{% if not form.instance.id %}
+            <tr>
+                {% include 'save.html' %}
+            </tr>
+        {% endif %}
+
+and i will add another to the for loop
+now if we are editing instead of the row and the form on top of the table
+we have only rows but one ready to edit, it had loaded the instance
+because the if edit block.
+
+{% for todo in todos %}
+        <tr>
+            {% if form.instance.id == todo.id %}
+                {% include 'save.html' %}
+            {% else %}
+                <td>{{ todo.task }}</td>
+                <td>{% if todo.done %}Yes{% else %}No{% endif %}</td>
+                <td>{{ todo.date }}</td>
+                <td>
+                    <button formnovalidate name="edit" value="{{ todo.id }}">Edit</button>
+                    <button formnovalidate name="delete" value="{{ todo.id }}">Delete</button>
+                </td>
+            {% endif %}
+        </tr>
+    {% endfor %}
+
+
+the last thing is check if there is a pk on the save:
+        if 'save' in request.POST:
+            pk = request.POST.get('save')
+            if not pk:
+                form = TodoForm(request.POST)
+            else:
+                todo = Todo.objects.get(id=pk)
+                form = TodoForm(request.POST, instance=todo)
+            form.save()
+            form = TodoForm()
+
+If there is a pk it says that we are editing so we need to pass
+the request with the instance that will be edited
+
+finally save the form and generate an empty one to show at top again.

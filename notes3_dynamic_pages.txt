@@ -1,0 +1,48 @@
+Now lets see how to create dinamic pages
+we need to pass to the pages the context
+it is like in Flask the att which i passed on the render of the component
+*Maybe it could be used like in flask but for now this way is ok
+
+def index(request):
+    context = {} # declare the context
+    todos = Todo.objects.all()
+    context['todos'] = todos  # adding some attributes with a value
+    context['title'] = 'Home'
+    return render(request, 'index.html', context)
+
+
+then to get it and use it on the page will be like:
+    <title>{{ title }}</title>
+
+
+FORMS
+
+Also very similar to Flask WTF but built in
+First I need to create a file called forms.py in my appFolder
+the import forms and the model/s I want use to the form
+
+from django import forms
+from todoList.models import Todo
+
+Then I declare a class with the fields of the  form
+I use the class Meta to get the model(its fields)
+finally declare the fields, if I dont use this att i think it will show all fields
+
+class TodoForm(forms.ModelForm):
+    class Meta:
+        model = Todo
+        fields = ['task', 'done']
+
+
+Having this like in Flask i need to create an instace and
+pass it in the context in the file views:
+
+def index(request):
+    context = {}
+    form = TodoForm()  # create the instace of the class previously made
+    todos = Todo.objects.all()
+    context['todos'] = todos
+    context['title'] = 'Home'
+    context['form'] = form  # Add to the context
+    return render(request, 'index.html', context)
+

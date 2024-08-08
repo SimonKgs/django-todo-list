@@ -1,0 +1,143 @@
+In the folder of the actual project there is a file called models.py
+here I will define my models like the database.py I made with Flask
+
+from django.db import models
+from datetime import date
+
+
+# Create your models here.
+class Todo(models.Model):
+    task = models.CharField(max_length=50, blank=False, null=False)  # Ensure this is required
+    done = models.BooleanField(default=False)
+    date = models.DateTimeField(default=date.today)
+
+    def __str__(self):
+        return self.task
+
+after create our table/s we need to make a migration to apply the changes:
+
+generate migration:
+python manage.py makemigrations
+
+if we want see what will be happened after run this command we can see like:
+the last 2 params: nameapp, and version we can see after makemigrations command
+python manage.py sqlmigrate todoList 0002
+
+apply migration:
+python manage.py migrate
+
+This will be saved using sqlite which comes by default with django and can find it on the root
+of the project
+db.sqlite3
+
+Then it has a console where we can see and insert data on the db
+to access I need to enter using the command:
+
+python manage.py shell
+
+this will take me to a console i need to import my model like
+from todoList.models import Todo
+
+now we already have load our model and could
+execute queries in the tables like
+Todo.objects.all()
+
+at this time will be an empty set:
+>>> Todo.objects.all()
+<QuerySet []>
+
+but it is working, lets insert our first data
+first we can create an object
+>>> todo = Todo(task='Learn Django')
+
+now we can access it like
+>>> todo
+<Todo: Learn Django>
+>>> todo.task
+'Learn Django'
+
+and to insert it in my db only need to do is
+todo.save()
+to delete:
+todo.delete()
+
+To make more we can do it like
+Todo(task='Learn Vue').save()
+Todo(task='Practice Python').save()
+Todo(task='Sleep').save()
+Todo(task='Practice JS').save()
+Todo(task='Find a Job').save()
+
+
+we can also in this console make for loops etc
+>>> for todo in todos:
+...     print(f"todo: {todo.task}, date: {todo.date}, done: {todo.done}")
+...
+todo: Learn Django, date: 2024-08-02 14:41:06.179747+00:00, done: False
+todo: Learn Vue, date: 2024-08-02 14:44:37.693756+00:00, done: False
+todo: Practice Python, date: 2024-08-02 14:44:37.703173+00:00, done: False
+todo: Sleep, date: 2024-08-02 14:44:37.707174+00:00, done: False
+
+also can order_by(value) and to reverse it only adding a - before the column name
+>>> for todo in todos.order_by('-date'):
+...     print(f"todo: {todo.task}, date: {todo.date}, done: {todo.done}")
+
+
+it also lets us filter by values with some options
+lets figure our model have a field value to this example
+high_value = Todo.objects.filter(value__gte=10)
+value__: is the name of the column
+GTE means: greater than or equal
+
+This was one way to work with but we also have an admin console
+which let us to do this visually.
+
+to enter only add /admin to our main page
+we now need a password and user which I dont have created yet so lets go
+
+come back to the console on the project template and execute
+python manage.py createsuperuser
+it will ask for
+name: simon
+email: simonudemy09@gmail.com
+password: pydjango12!1a
+
+if we enter now only see the user and groups
+to see our models I need to add them to the file on project/admin.py
+todoList/admin.py
+
+to register a model is like:
+first import
+from todoList.models import Todo
+
+then register
+# Register your models here.
+admin.site.register(Todo)
+
+now if i run the server again I am able to see my model
+Here I can add, modify, create or delete somo entries
+
+but to see the values of each entry i need to click and enter on it
+I can make it looks different in this case i want to see all fields from
+the main layout without enter the object one by one.
+
+to do it i can do creating a class in todoList/admin.py
+
+class TodoAdmin(admin.ModelAdmin):
+    list_display = ['task', 'date', 'done']
+
+
+# Register your models here.
+admin.site.register(Todo, TodoAdmin)
+
+before the register we have to define a class with admin.ModelAdmin
+then declare the list_display wit the columns i want to show
+finally i must add the class to the register
+
+
+class Meta
+
+is a class that we could define inside our class thanks to django
+it will let us make some things like order the by default
+
+
