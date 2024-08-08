@@ -27,5 +27,7 @@
    **Open application**: This appication will run on http://127.0.0.1:8000
 
    **Create**: Add a new name and save the new task, it will be added to the list.
+   
    **Edit**: This will let you modify the name of the task or mark it as done.
+   
    **Delete**: With this button you will delete the task.
